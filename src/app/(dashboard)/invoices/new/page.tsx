@@ -19,6 +19,7 @@ export default function NewInvoicePage() {
   const preselectedEquipment = searchParams.get("equipment_id");
   const fileRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [form, setForm] = useState({
@@ -98,8 +99,16 @@ export default function NewInvoicePage() {
           <CardHeader><CardTitle className="text-base">Fichier</CardTitle></CardHeader>
           <CardContent>
             <div
-              className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center cursor-pointer hover:border-blue-400 transition-colors"
+              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${dragging ? "border-blue-500 bg-blue-50" : "border-gray-200 hover:border-blue-400"}`}
               onClick={() => fileRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDragging(false);
+                const dropped = e.dataTransfer.files?.[0];
+                if (dropped) setFile(dropped);
+              }}
             >
               {file ? (
                 <p className="text-sm font-medium text-blue-700">{file.name}</p>

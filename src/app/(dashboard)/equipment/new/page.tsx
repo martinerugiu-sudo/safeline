@@ -69,7 +69,7 @@ export default function NewEquipmentPage() {
       setLoading(false);
       return;
     }
-    toast({ title: "EPI ajouté", description: `${form.brand} ${form.model} enregistré avec succès.` });
+    toast({ title: "Équipement ajouté !", description: `${form.brand} ${form.model} a bien été enregistré dans votre inventaire.` });
     router.push("/equipment");
     router.refresh();
   }

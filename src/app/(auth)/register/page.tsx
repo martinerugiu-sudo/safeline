@@ -1,18 +1,19 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/lib/use-toast";
 import { Toaster } from "@/components/ui/toaster";
-import { Loader2 } from "lucide-react";
+import { Loader2, Mail, CheckCircle } from "lucide-react";
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
   const [form, setForm] = useState({ fullName: "", email: "", password: "", company: "" });
 
   function update(field: string) {
@@ -37,8 +38,59 @@ export default function RegisterPage() {
       setLoading(false);
       return;
     }
-    toast({ title: "Compte créé !", description: "Vérifiez votre email pour confirmer votre inscription." });
-    router.push("/login");
+    setRegisteredEmail(form.email);
+    setEmailSent(true);
+    setLoading(false);
+  }
+
+  async function handleResend() {
+    setResending(true);
+    const supabase = createClient();
+    const { error } = await supabase.auth.resend({ type: "signup", email: registeredEmail });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Email renvoyé !", description: "Vérifiez votre boîte mail." });
+    }
+    setResending(false);
+  }
+
+  if (emailSent) {
+    return (
+      <>
+        <Toaster />
+        <div className="text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-green-100 rounded-full p-4">
+              <CheckCircle className="h-10 w-10 text-green-500" />
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Compte créé !</h1>
+          <p className="text-gray-600 mb-2">Un email de confirmation a été envoyé à :</p>
+          <p className="font-semibold text-blue-600 mb-6">{registeredEmail}</p>
+
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-left mb-6 space-y-2">
+            <div className="flex items-start gap-2">
+              <Mail className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <p className="font-medium text-gray-800">Étape suivante</p>
+                <p className="text-sm text-gray-600">Ouvrez votre boîte mail et cliquez sur le lien de confirmation pour activer votre compte.</p>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-sm text-gray-500 mb-3">Vous n'avez pas reçu l'email ?</p>
+          <Button variant="outline" onClick={handleResend} disabled={resending} className="w-full">
+            {resending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            Renvoyer l'email de confirmation
+          </Button>
+
+          <p className="text-center text-sm text-gray-500 mt-4">
+            <Link href="/login" className="text-blue-600 hover:underline font-medium">Se connecter</Link>
+          </p>
+        </div>
+      </>
+    );
   }
 
   return (
@@ -64,7 +116,7 @@ export default function RegisterPage() {
           <Input id="password" type="password" value={form.password} onChange={update("password")} placeholder="Min. 8 caractères" required minLength={8} autoComplete="new-password" />
         </div>
         <Button type="submit" className="w-full" disabled={loading}>
-          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+          {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
           Créer mon compte gratuitement
         </Button>
       </form>
