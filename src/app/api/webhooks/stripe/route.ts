@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { stripe, PLAN_BY_PRICE } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/server";
