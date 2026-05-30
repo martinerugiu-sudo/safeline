@@ -11,6 +11,14 @@ for (const key of requiredEnv) {
   }
 }
 
+const supabaseUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL!);
+
+if (!supabaseUrl.hostname.endsWith(".supabase.co")) {
+  throw new Error(
+    "NEXT_PUBLIC_SUPABASE_URL must be your Supabase project URL, for example https://xxxx.supabase.co"
+  );
+}
+
 const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
